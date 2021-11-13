@@ -85,7 +85,7 @@ template<typename T>
 double ParamRange<T>::CurrentDouble(){
 	double result = -1;
 	if(std::is_same<T,double>::value){
-		result = *_param;
+		result = *(double *)_param;
 	}
 	else if(std::is_same<T, Time>::value){
 		result = ((Time)*_param).GetSeconds();
