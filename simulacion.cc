@@ -24,15 +24,26 @@ Punto punto(T * scenaryParams, double abscisa, int numIter, int porcentajeConzia
 	Average<double> pointValue;
 	double simulationValue;
 	
+	StageConfig_t *aux = (StageConfig_t *)scenaryParams;
+	NS_LOG_INFO("Simulating with params: " << \
+				"\n\tNumClientes: " << aux->numClientes << \
+				"\n\tRegimenBinarioPuente: " << aux->regimenBinarioPuente << \
+				"\n\tTamPaquetesFuentes: " << aux->tamPaquetesFuentes << \
+				"\n\tIntervaloPaqsCliente: " << aux->intervaloPaqsCliente << \
+				"\n\tNumPaquetes: " << aux->numPaquetes);
+		
 	for(int i = 0; i < numIter; i++){
 		simulationValue = escenario(scenaryParams);
 		pointValue.Update(simulationValue);
 	}
 	
-	error = tStudentInv(numIter-1, (100-porcentajeConzianza)/200) * sqrt(pointValue.Var()/numIter);
-	if(error < 0){
-		NS_LOG_ERROR("Failed to calcule t-Student value");
+	try{
+		error = tStudentInv(numIter-1, (double)(100-porcentajeConzianza)/200) * sqrt(pointValue.Var()/numIter);
+	}catch(string msg){
+		NS_LOG_ERROR("Failed to calcule t-Student value: " << msg);
 	}
+	
+	NS_LOG_INFO("Simulation result: " << pointValue.Mean());
 	
 	return Punto(abscisa, pointValue.Mean(), error);
 
@@ -74,7 +85,7 @@ Gnuplot grafica(T * scenaryParams, TitulosGrafica_t titulos, ParamRange<U> curve
 	
 	do{
 		char curveName[30];
-		sprintf(curveName, titulos.curveExpresion, curveParam.Current());
+		sprintf(curveName, titulos.curveExpresion, curveParam.CurrentDouble());
 		Gnuplot2dDataset curvita = curva(scenaryParams, string(curveName), pointParam, numIter, porcentajeConzianza, escenario);
 		grafiquita.AddDataset(curvita);
 	}while(curveParam.Next());
@@ -93,3 +104,5 @@ template Gnuplot2dDataset curva<StageConfig_t, Time>(StageConfig_t * scenaryPara
 template Gnuplot2dDataset curva<StageConfig_t, double>(StageConfig_t * scenaryParams, string curveName, ParamRange<double> variableParam, int numIter, int porcentajeConzianza, double (*escenario)(StageConfig_t * scenaryParams));
 
 template Gnuplot grafica<StageConfig_t, double, Time>(StageConfig_t * scenaryParams, TitulosGrafica_t titulos, ParamRange<double> curveParam, ParamRange<Time> pointParam, int numIter, int porcentajeConzianza, double (*escenario)(StageConfig_t * scenaryParams));
+
+template Gnuplot grafica<StageConfig_t, int, Time>(StageConfig_t * scenaryParams, TitulosGrafica_t titulos, ParamRange<int> curveParam, ParamRange<Time> pointParam, int numIter, int porcentajeConzianza, double (*escenario)(StageConfig_t * scenaryParams));

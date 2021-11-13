@@ -90,6 +90,9 @@ double ParamRange<T>::CurrentDouble(){
 	else if(std::is_same<T, Time>::value){
 		result = ((Time)*_param).GetSeconds();
 	}
+	else if(std::is_same<T, int>::value){
+		result = (double)*(int *)_param;
+	}
 	return result;
 }
 		
@@ -98,3 +101,4 @@ double ParamRange<T>::CurrentDouble(){
 
 template class ParamRange<Time>;
 template class ParamRange<double>;
+template class ParamRange<int>;

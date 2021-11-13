@@ -34,33 +34,4 @@ class ParamRange{
 };
 
 
-/*
-class DoubleParamRange : public ParamRange<double>{
-	public:
-		using ParamRange<double>::ParamRange;
-	protected:
-		double progressionAritmetic(){
-			return initialValue + index * aritmeticProgressionRate;
-		}
-		double progressionGeometric(){
-			return initialValue * pow(geometricProgressionRate, index);    // Ojo con los índices en la progresión geométrica
-		}
-};
-
-
-class TimeParamRange : public ParamRange<Time>{
-	public:
-		using ParamRange<Time>::ParamRange;
-	protected:
-		Time progressionAritmetic(){
-			return initialValue + index * aritmeticProgressionRate;
-		}
-		Time progressionGeometric(){
-			return initialValue * pow(geometricProgressionRate, index);    // Ojo con los índices en la progresión geométrica
-		}
-};
-*/
-
-
-
 #endif
