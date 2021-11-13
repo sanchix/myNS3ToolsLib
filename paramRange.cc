@@ -71,17 +71,28 @@ void ParamRange<T>::Reset(){
 	*_param = initialValue;
 }
 
-
-// Double
-/*
-double DoubleParamRange::progresionAritmetic(){
-	return initialValue + index * _progressionRate;
+template<typename T>
+T ParamRange<T>::progressionAritmetic(){
+	return initialValue + index * aritmeticProgressionRate;
 }
-*/
 
+template<typename T>
+T ParamRange<T>::progressionGeometric(){
+	return initialValue * pow(geometricProgressionRate, index);    // Ojo con los índices en la progresión geométrica
+}
 
-// Time
-
+template<typename T>
+double ParamRange<T>::CurrentDouble(){
+	double result = -1;
+	if(std::is_same<T,double>::value){
+		result = *(double *)_param;
+	}
+	else if(std::is_same<T, Time>::value){
+		result = ((Time)*_param).GetSeconds();
+	}
+	return result;
+}
+		
 
 // Trampa
 

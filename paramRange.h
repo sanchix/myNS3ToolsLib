@@ -20,7 +20,7 @@ class ParamRange{
 		T Current();
 		double CurrentDouble();
 		void Reset();
-	protected:
+	private:
 		T initialValue;
 		T * _param;
 		int index;
@@ -29,12 +29,12 @@ class ParamRange{
 		bool definedProgressionRate = false;
 		double geometricProgressionRate;
 		T aritmeticProgressionRate;
-		virtual T progressionAritmetic() = 0;
-		virtual T progressionGeometric() = 0;
+		virtual T progressionAritmetic();
+		virtual T progressionGeometric();
 };
 
 
-
+/*
 class DoubleParamRange : public ParamRange<double>{
 	public:
 		using ParamRange<double>::ParamRange;
@@ -59,7 +59,7 @@ class TimeParamRange : public ParamRange<Time>{
 			return initialValue * pow(geometricProgressionRate, index);    // Ojo con los índices en la progresión geométrica
 		}
 };
-
+*/
 
 
 
