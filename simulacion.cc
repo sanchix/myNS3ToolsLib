@@ -31,7 +31,7 @@ Punto punto(T * scenaryParams, double abscisa, int numIter, int porcentajeConzia
 	
 	NS_LOG_FUNCTION(abscisa);
 	
-	int error = 0;
+	double error = 0;
 	Average<double> pointValue;
 	key_t clave = ftok(".", 'm');
 	int msgqueue_id;
@@ -87,7 +87,7 @@ Punto punto(T * scenaryParams, double abscisa, int numIter, int porcentajeConzia
 		NS_LOG_ERROR("Failed to calcule t-Student value: " << msg);
 	}
 	
-	NS_LOG_INFO("Simulation result: " << pointValue.Mean());
+	NS_LOG_INFO("Simulation result: " << pointValue.Mean() << ", error: " << error);
 	
 	return Punto(abscisa, pointValue.Mean(), error);
 
