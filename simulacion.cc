@@ -1,7 +1,11 @@
 
 #include <string>
+#include <sys/msg.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include "ns3/gnuplot.h"
 #include "ns3/log.h"
+#include "ns3/rng-seed-manager.h"
 #include "simulacion.h"
 #include "punto.h"
 #include "escenarioP5.h"
@@ -15,6 +19,13 @@ using namespace std;
 NS_LOG_COMPONENT_DEFINE("Simulacion");
 
 
+#define QUEUE_TYPE 1
+struct mymsgbuf{
+	long mtype;
+	double mval;
+};
+
+
 template <typename T>
 Punto punto(T * scenaryParams, double abscisa, int numIter, int porcentajeConzianza, double (*escenario)(T * scenaryParams)){
 	
@@ -22,7 +33,15 @@ Punto punto(T * scenaryParams, double abscisa, int numIter, int porcentajeConzia
 	
 	int error = 0;
 	Average<double> pointValue;
-	double simulationValue;
+	key_t clave = ftok(".", 'm');
+	int msgqueue_id;
+	struct mymsgbuf qbuffer;
+	pid_t pid;
+	pid_t jobs[200];    //OJO
+	
+	if(numIter > 200){
+		throw;
+	}
 	
 	StageConfig_t *aux = (StageConfig_t *)scenaryParams;
 	NS_LOG_INFO("Simulating with params: " << \
@@ -33,8 +52,33 @@ Punto punto(T * scenaryParams, double abscisa, int numIter, int porcentajeConzia
 				"\n\tNumPaquetes: " << aux->numPaquetes);
 		
 	for(int i = 0; i < numIter; i++){
-		simulationValue = escenario(scenaryParams);
-		pointValue.Update(simulationValue);
+		SeedManager::SetSeed(SeedManager::GetSeed()+1);
+		pid = fork();
+		if(pid == 0){    // Hijo
+			if((msgqueue_id=msgget(clave,IPC_CREAT|0660)) == -1){
+				NS_LOG_ERROR("ERROR AL CREAR LA COLA");
+				throw;
+			}
+			qbuffer.mtype = QUEUE_TYPE;
+			qbuffer.mval = escenario(scenaryParams);
+			msgsnd(msgqueue_id, &qbuffer, sizeof(double), 0);
+			//std::terminate();
+			kill(getpid(), SIGKILL);
+		}
+		else{
+			jobs[i] = pid;
+		}
+	}
+	
+	if((msgqueue_id=msgget(clave,IPC_CREAT|0660)) == -1){
+		NS_LOG_ERROR("ERROR AL CREAR LA COLA");
+		throw;
+	}
+	for(int i = 0; i < numIter; i++){
+		//wait(jobs[i]);
+		msgrcv(msgqueue_id, &qbuffer, sizeof(double), QUEUE_TYPE, 0);
+		pointValue.Update(qbuffer.mval);
+		NS_LOG_DEBUG("Recibido valor: " << qbuffer.mval << " de pid " << jobs[i]);
 	}
 	
 	try{
